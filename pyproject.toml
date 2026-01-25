@@ -22,3 +22,9 @@ markers = [
   "contract: schema/OpenAPI checks",
   "negative: error handling checks",
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
