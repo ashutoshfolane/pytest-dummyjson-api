@@ -41,8 +41,7 @@ jobs:
           if [ "${{ matrix.suite }}" = "smoke" ]; then
             pytest -m smoke --junitxml=artifacts/junit.xml --html=artifacts/report.html
           else
-            # Prefer -m regression once you tag them
-            pytest -m "not smoke" --junitxml=artifacts/junit.xml --html=artifacts/report.html
+            pytest -m regression --junitxml=artifacts/junit.xml --html=artifacts/report.html
           fi
 
       - name: Upload artifacts
