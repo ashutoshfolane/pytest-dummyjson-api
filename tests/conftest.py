@@ -9,7 +9,7 @@ def settings() -> Settings:
 
 
 @pytest.fixture(scope="session")
-def api(settings: Settings):
+def api(settings: Settings) -> ApiClient:
     client = ApiClient(settings)
     yield client
     client.close()

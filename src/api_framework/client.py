@@ -9,12 +9,14 @@ from .config import Settings
 class ApiClient:
     def __init__(self, settings: Settings):
         self.settings = settings
-        headers: dict[str, str] = {"Content-Type": "application/json"}
 
-        if settings.api_key:
-            headers["x-api-key"] = settings.api_key
-        if settings.reqres_env:
-            headers["X-Reqres-Env"] = settings.reqres_env
+        headers: dict[str, str] = {
+            "Accept": "application/json",
+            "User-Agent": "pytest-api-framework/1.0",
+        }
+
+        if settings.auth_header_value:
+            headers[settings.auth_header_name] = settings.auth_header_value
 
         self._client = httpx.Client(
             base_url=str(settings.base_url),
@@ -32,11 +34,10 @@ class ApiClient:
         retry=retry_if_exception_type((httpx.ConnectError, httpx.ReadTimeout)),
     )
     def request(self, method: str, path: str, **kwargs) -> httpx.Response:
-        # Note: we retry only on network/timeouts (not on 4xx/5xx)
         return self._client.request(method, path, **kwargs)
 
     def get(self, path: str, **kwargs) -> httpx.Response:
         return self.request("GET", path, **kwargs)
 
-    def post(self, path: str, **kwargs) -> httpx.Response:
-        return self.request("POST", path, **kwargs)
+    def post(self, path: str, json: dict | None = None, **kwargs) -> httpx.Response:
+        return self.request("POST", path, json=json, **kwargs)
