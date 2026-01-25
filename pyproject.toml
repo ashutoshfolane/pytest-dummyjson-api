@@ -27,6 +27,7 @@ markers = [
   "regression: broader coverage",
   "contract: schema/OpenAPI checks",
   "negative: error handling checks",
+  "auth: authenticated flows",
 ]
 
 [tool.setuptools]

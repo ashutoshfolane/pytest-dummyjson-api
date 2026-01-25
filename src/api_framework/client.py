@@ -3,29 +3,31 @@ from __future__ import annotations
 import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
+from .auth import AuthClient
 from .config import Settings
 
 
 class ApiClient:
     def __init__(self, settings: Settings):
         self.settings = settings
-
-        headers: dict[str, str] = {
-            "Accept": "application/json",
-            "User-Agent": "pytest-api-framework/1.0",
-        }
-
-        if settings.auth_header_value:
-            headers[settings.auth_header_name] = settings.auth_header_value
-
-        self._client = httpx.Client(
+        self.http = httpx.Client(
             base_url=str(settings.base_url),
-            headers=headers,
+            headers={"Content-Type": "application/json"},
             timeout=settings.timeout_seconds,
         )
+        self.auth = AuthClient(settings, self.http)
 
     def close(self) -> None:
-        self._client.close()
+        self.http.close()
+
+    def _auth_headers(self) -> dict[str, str]:
+        token = self.auth.get_token()
+        if not token:
+            return {}
+
+        header_name = (self.settings.auth_header_name or "Authorization").strip()
+        # Always send Bearer <token> for DummyJSON; token is raw at this point.
+        return {header_name: f"Bearer {token}"}
 
     @retry(
         reraise=True,
@@ -33,11 +35,15 @@ class ApiClient:
         wait=wait_exponential(multiplier=0.5, min=0.5, max=4),
         retry=retry_if_exception_type((httpx.ConnectError, httpx.ReadTimeout)),
     )
-    def request(self, method: str, path: str, **kwargs) -> httpx.Response:
-        return self._client.request(method, path, **kwargs)
+    def request(self, method: str, path: str, *, auth: bool = False, **kwargs) -> httpx.Response:
+        headers = dict(kwargs.pop("headers", {}) or {})
+        if auth:
+            headers.update(self._auth_headers())
 
-    def get(self, path: str, **kwargs) -> httpx.Response:
-        return self.request("GET", path, **kwargs)
+        return self.http.request(method, path, headers=headers, **kwargs)
 
-    def post(self, path: str, json: dict | None = None, **kwargs) -> httpx.Response:
-        return self.request("POST", path, json=json, **kwargs)
+    def get(self, path: str, *, auth: bool = False, **kwargs) -> httpx.Response:
+        return self.request("GET", path, auth=auth, **kwargs)
+
+    def post(self, path: str, *, auth: bool = False, **kwargs) -> httpx.Response:
+        return self.request("POST", path, auth=auth, **kwargs)
