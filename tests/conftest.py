@@ -1,6 +1,7 @@
 import pytest
-from api_framework.config import Settings
+
 from api_framework.client import ApiClient
+from api_framework.config import Settings
 from api_framework.validation import validate_settings
 
 
