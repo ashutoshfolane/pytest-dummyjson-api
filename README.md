@@ -21,24 +21,88 @@ This repository demonstrates how to build a **scalable, maintainable API test fr
 ---
 ## Project structure
 ```text
-pytest-dummyjson-api/
+pytest-dummyjson-api
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                  # PR smoke + main regression
+│       └── nightly.yml             # Scheduled nightly regression
+│
 ├── src/
 │   └── api_framework/
-│       ├── client.py        # API client wrapper
-│       ├── auth.py          # Token-based auth helper
-│       ├── config.py        # Config + env loading
-│       └── validation.py   # Fail-fast config validation
+│       ├── client.py               # Core HTTP client (httpx, retries, auth, logging)
+│       ├── auth.py                 # Token minting & auth strategy
+│       ├── config.py               # Environment & settings loader
+│       │
+│       ├── clients/                # Domain-level API abstractions
+│       │   ├── __init__.py
+│       │   ├── users_client.py     # Users domain operations
+│       │   └── auth_client.py      # Auth domain operations
+│       │
+│       ├── validation/             # Validation utilities
+│       │   ├── __init__.py
+│       │   ├── settings.py         # Config validation (fail-fast)
+│       │   └── schema.py           # JSON Schema / contract validation
+│       │
+│       └── utils/                  # Shared helpers (logging, redaction, etc.)
+│
 ├── tests/
-│   ├── conftest.py          # pytest fixtures & --env option
-│   ├── test_users_smoke.py
-│   ├── test_auth_smoke.py
-│   └── test_me_authenticated.py
+│   ├── auth/                       # Auth domain tests
+│   │   ├── test_login_smoke.py
+│   │   └── test_me_authenticated.py
+│   │
+│   ├── users/                      # Users domain tests
+│   │   ├── test_users_smoke.py
+│   │   └── test_users_regression.py
+│   │
+│   ├── contracts/                  # Contract / schema tests
+│   │   └── test_users_contract.py
+│   │
+│   ├── schemas/                    # JSON Schemas for contract validation
+│   │   └── users_list.schema.json
+│   │
+│   └── conftest.py                 # Pytest fixtures (api, settings)
+│
 ├── env/
-│   └── .env.example         # Example config (committed)
-├── .pre-commit-config.yaml
-├── Makefile
-├── pyproject.toml
-└── README.md
+│   └── .env.local.example          # Example env config (no secrets)
+│
+├── pyproject.toml                  # Dependencies, pytest config, linting
+├── README.md
+└── CODEOWNERS
+```
+## Test Architecture
+```text
+┌──────────────────────┐
+│        Tests         │
+│  (smoke / regression │
+│   / contract suites) │
+└───────────┬──────────┘
+            │
+            ▼
+┌──────────────────────┐
+│    Domain Clients    │
+│  UsersClient, Auth   │
+│  (business intent)   │
+└───────────┬──────────┘
+            │
+            ▼
+┌──────────────────────┐
+│     API Client       │
+│  httpx + retries +   │
+│  auth + logging      │
+└───────────┬──────────┘
+            │
+            ▼
+┌──────────────────────┐
+│   External API       │
+│    (DummyJSON)       │
+└───────────┬──────────┘
+            │
+            ▼
+┌──────────────────────┐
+│ Contract Validation  │
+│ JSON Schema checks  │
+│ (@contract tests)   │
+└──────────────────────┘
 ```
 ---
 ## Environment configuration
