@@ -1,0 +1,14 @@
+# Default owner for everything
+* @ashutoshfolane
+
+# Core framework (highest risk)
+src/api_framework/** @ashutoshfolane
+
+# Test code
+tests/** @ashutoshfolane
+
+# CI & automation
+.github/workflows/** @ashutoshfolane
+
+# Dependency & config files
+pyproject.toml @ashutoshfolane
