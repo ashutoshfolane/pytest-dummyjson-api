@@ -43,14 +43,29 @@ jobs:
       - name: Run Regression tests
         run: |
           mkdir -p artifacts
+          set -o pipefail
           pytest -m regression \
+            --capture=tee-sys \
             --junitxml=artifacts/junit-nightly.xml \
-            --html=artifacts/report-nightly.html --self-contained-html
+            --html=artifacts/report-nightly.html --self-contained-html \
+            2>&1 | tee artifacts/console.log
 
-      - name: Upload artifacts (always)
+      # Always upload reports
+      - name: Upload report artifacts (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nightly-artifacts
-          path: artifacts/
+          name: nightly-reports
+          path: |
+            artifacts/junit-nightly.xml
+            artifacts/report-nightly.html
+          if-no-files-found: warn
+
+      # Upload logs only if something failed
+      - name: Upload logs on failure (sanitized)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-logs-failure
+          path: artifacts/console.log
           if-no-files-found: warn
