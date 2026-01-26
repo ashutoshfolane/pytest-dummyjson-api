@@ -21,8 +21,8 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       BASE_URL: "https://dummyjson.com"
-      USERNAME: ${{ secrets.DUMMYJSON_USERNAME }}
-      PASSWORD: ${{ secrets.DUMMYJSON_PASSWORD }}
+      AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
+      AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
 
     steps:
       - name: Checkout
