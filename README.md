@@ -105,6 +105,31 @@ Run full regression
 make regression
 ```
 ---
+## CI Test Runs
+### GitHub Actions pipelines:
+• Smoke tests on every PR
+• Full regression on main and nightly schedule
+### Test artifacts generated on CI:
+• JUnit XML (for CI integrations)
+• pytest-html report (self-contained)
+---
+## Secure & Transparent API Logging
+* request/response logging for all API calls (pass or fail)
+* log redaction to prevent credential leakage:
+  * Redacts Authorization, Cookie, Set-Cookie
+  * Redacts sensitive JSON fields (e.g. accessToken, refreshToken, password)
+* Logs are printed in JSON-formatted, readable blocks for easy inspection
+* CI uses --capture=tee-sys so logs appear in:
+  * Console output
+  * HTML reports
+---
+## Test Reports
+* pytest-html reports include:
+  * Environment details (Python, OS, plugins)
+  * Per-test execution status
+  * Captured request/response logs
+* Reports are published as CI artifacts for post-run inspection
+---
 ## Test markers
 | Marker       | Purpose              |
 |--------------|----------------------|
