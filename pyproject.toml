@@ -21,7 +21,7 @@ dependencies = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q -ra"
+addopts = "-q -ra -s"
 markers = [
   "smoke: fast critical checks",
   "regression: broader coverage",
