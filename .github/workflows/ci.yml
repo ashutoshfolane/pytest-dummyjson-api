@@ -45,6 +45,7 @@ jobs:
         run: |
           mkdir -p artifacts
           pytest -m smoke \
+            --capture=tee-sys \
             --junitxml=artifacts/junit-smoke.xml \
             --html=artifacts/report-smoke.html --self-contained-html
 
