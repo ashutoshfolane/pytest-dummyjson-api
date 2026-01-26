@@ -2,7 +2,7 @@ import pytest
 
 from api_framework.client import ApiClient
 from api_framework.config import settings_for
-from api_framework.validation import validate_settings
+from api_framework.validation.settings import validate_settings
 
 
 def pytest_addoption(parser):
