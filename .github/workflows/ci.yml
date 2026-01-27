@@ -3,6 +3,8 @@ name: API CI
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -14,7 +16,7 @@ concurrency:
 
 jobs:
   smoke:
-    name: Smoke (PR)
+    name: Smoke (PR + main)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -50,10 +52,52 @@ jobs:
             --html=artifacts/report-smoke.html --self-contained-html \
             2>&1 | tee artifacts/console.log
 
-      - name: Flake report (report-only)
+      # -----------------------
+      # report-only flaky detection (needs persistence)
+      # -----------------------
+      - name: Restore flake history cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: .cache/flakes/history.json
+          key: flakes-history-${{ github.ref_name }}
+          restore-keys: |
+            flakes-history-
+
+      - name: Flake report
         if: always()
         run: |
           python -m api_framework.reporting.flakes --junit artifacts/junit-smoke.xml
+
+      - name: Save flake history cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: .cache/flakes/history.json
+          key: flakes-history-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            flakes-history-${{ github.ref_name }}
+            flakes-history-
+
+      # -----------------------
+      # metrics + dashboard (report-only)
+      # -----------------------
+      - name: Metrics + dashboard
+        if: always()
+        run: |
+          python -m api_framework.reporting.metrics \
+            --suite smoke \
+            --junit artifacts/junit-smoke.xml \
+            --flakes-history .cache/flakes/history.json \
+            --out-json artifacts/metrics.json \
+            --out-md artifacts/metrics.md
+
+          # Keep CI resilient if dashboard file is missing.
+          if [ -f dashboards/dashboard.html ]; then
+            cp dashboards/dashboard.html artifacts/dashboard.html
+          else
+            echo "dashboards/dashboard.html not found (skipping copy)"
+          fi
 
       # Always upload reports
       - name: Upload report artifacts (always)
@@ -65,6 +109,9 @@ jobs:
             artifacts/junit-smoke.xml
             artifacts/report-smoke.html
             artifacts/flake-report.md
+            artifacts/metrics.json
+            artifacts/metrics.md
+            artifacts/dashboard.html
           if-no-files-found: warn
 
       # Upload logs only if something failed

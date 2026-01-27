@@ -50,10 +50,46 @@ jobs:
             --html=artifacts/report-nightly-regression.html --self-contained-html \
             2>&1 | tee artifacts/console.log
 
-      - name: Flake report (report-only)
+      # --- flake history + metrics/dashboard ---
+      - name: Restore flake history cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: .cache/flakes/history.json
+          key: flakes-history-nightly
+          restore-keys: |
+            flakes-history-
+
+      - name: Flake report
         if: always()
         run: |
-          python -m api_framework.reporting.flakes --junit artifacts/junit-nightly.xml
+          python -m api_framework.reporting.flakes --junit artifacts/junit-nightly-regression.xml
+
+      - name: Save flake history cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: .cache/flakes/history.json
+          key: flakes-history-nightly-${{ github.run_id }}
+          restore-keys: |
+            flakes-history-nightly
+            flakes-history-
+
+      - name: Metrics + dashboard
+        if: always()
+        run: |
+          python -m api_framework.reporting.metrics \
+            --suite regression \
+            --junit artifacts/junit-nightly-regression.xml \
+            --flakes-history .cache/flakes/history.json \
+            --out-json artifacts/metrics-regression.json \
+            --out-md artifacts/metrics-regression.md
+
+          if [ -f dashboards/dashboard.html ]; then
+            cp dashboards/dashboard.html artifacts/dashboard-regression.html
+          else
+            echo "dashboards/dashboard.html not found (skipping copy)"
+          fi
 
       - name: Upload report artifacts (always)
         if: always()
@@ -63,6 +99,10 @@ jobs:
           path: |
             artifacts/junit-nightly-regression.xml
             artifacts/report-nightly-regression.html
+            artifacts/flake-report.md
+            artifacts/metrics-regression.json
+            artifacts/metrics-regression.md
+            artifacts/dashboard-regression.html
           if-no-files-found: warn
 
       - name: Upload logs on failure (sanitized)
@@ -108,6 +148,47 @@ jobs:
             --html=artifacts/report-nightly-contract.html --self-contained-html \
             2>&1 | tee artifacts/console.log
 
+      # --- flake history + metrics/dashboard ---
+      - name: Restore flake history cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: .cache/flakes/history.json
+          key: flakes-history-nightly
+          restore-keys: |
+            flakes-history-
+
+      - name: Flake report
+        if: always()
+        run: |
+          python -m api_framework.reporting.flakes --junit artifacts/junit-nightly-contract.xml
+
+      - name: Save flake history cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: .cache/flakes/history.json
+          key: flakes-history-nightly-${{ github.run_id }}
+          restore-keys: |
+            flakes-history-nightly
+            flakes-history-
+
+      - name: Metrics + dashboard
+        if: always()
+        run: |
+          python -m api_framework.reporting.metrics \
+            --suite contract \
+            --junit artifacts/junit-nightly-contract.xml \
+            --flakes-history .cache/flakes/history.json \
+            --out-json artifacts/metrics-contract.json \
+            --out-md artifacts/metrics-contract.md
+
+          if [ -f dashboards/dashboard.html ]; then
+            cp dashboards/dashboard.html artifacts/dashboard-contract.html
+          else
+            echo "dashboards/dashboard.html not found (skipping copy)"
+          fi
+
       - name: Upload report artifacts (always)
         if: always()
         uses: actions/upload-artifact@v4
@@ -116,6 +197,10 @@ jobs:
           path: |
             artifacts/junit-nightly-contract.xml
             artifacts/report-nightly-contract.html
+            artifacts/flake-report.md
+            artifacts/metrics-contract.json
+            artifacts/metrics-contract.md
+            artifacts/dashboard-contract.html
           if-no-files-found: warn
 
       - name: Upload logs on failure (sanitized)

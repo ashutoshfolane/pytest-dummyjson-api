@@ -1,0 +1,53 @@
+{
+  "files": [
+    {
+      "duration_s": 0.038,
+      "failed": 0,
+      "file": "tests/auth/test_auth_smoke.py",
+      "passed": 0,
+      "skipped": 1,
+      "total": 1
+    },
+    {
+      "duration_s": 0.201,
+      "failed": 0,
+      "file": "tests/users/test_users_smoke.py",
+      "passed": 1,
+      "skipped": 0,
+      "total": 1
+    }
+  ],
+  "flakes": {
+    "flaky_candidates": [],
+    "flaky_candidates_count": 0,
+    "history_path": ""
+  },
+  "generated_at_utc": "2026-01-27T06:24:04Z",
+  "junit_path": "artifacts/junit-smoke.xml",
+  "run_id": "1769495044",
+  "schema_version": 1,
+  "slowest_tests": [
+    {
+      "duration_s": 0.201,
+      "file": "tests/users/test_users_smoke.py",
+      "outcome": "passed",
+      "test_id": "tests.users.test_users_smoke::test_list_users"
+    },
+    {
+      "duration_s": 0.038,
+      "file": "tests/auth/test_auth_smoke.py",
+      "outcome": "skipped",
+      "test_id": "tests.auth.test_auth_smoke::test_login_gets_token_if_creds_present"
+    }
+  ],
+  "suite": "smoke",
+  "summary": {
+    "duration_s": 0.239,
+    "failed": 0,
+    "pass_rate_percent": 50.0,
+    "passed": 1,
+    "skipped": 1,
+    "total": 2
+  },
+  "top_failures": []
+}
