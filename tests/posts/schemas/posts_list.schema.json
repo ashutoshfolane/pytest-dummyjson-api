@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DummyJSON posts list response",
+  "type": "object",
+  "required": ["posts", "total", "skip", "limit"],
+  "properties": {
+    "posts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "body", "userId", "tags", "reactions", "views"],
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "body": { "type": "string" },
+          "userId": { "type": "integer" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "reactions": {
+            "type": ["object", "integer"],
+            "additionalProperties": true
+          },
+          "views": { "type": "integer" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "total": { "type": "integer" },
+    "skip": { "type": "integer" },
+    "limit": { "type": "integer" }
+  },
+  "additionalProperties": true
+}
