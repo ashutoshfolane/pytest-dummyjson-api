@@ -3,8 +3,6 @@ name: API CI
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,7 +14,7 @@ concurrency:
 
 jobs:
   smoke:
-    name: Smoke
+    name: Smoke (PR)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -50,15 +48,7 @@ jobs:
             --capture=tee-sys \
             --junitxml=artifacts/junit-smoke.xml \
             --html=artifacts/report-smoke.html --self-contained-html \
-            2>&1 | tee artifacts/console-smoke.log
-
-      - name: Write CI summary (Smoke)
-        if: always()
-        env:
-          SUITE_NAME: "Smoke"
-          JUNIT_PATTERN: "artifacts/junit-smoke.xml"
-        run: |
-          python tools/ci/junit_summary.py
+            2>&1 | tee artifacts/console.log
 
       # Always upload reports
       - name: Upload report artifacts (always)
@@ -77,72 +67,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: smoke-logs-failure
-          path: artifacts/console-smoke.log
-          if-no-files-found: warn
-
-  regression:
-    name: Regression
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: smoke
-    if: github.event_name != 'pull_request'
-
-    env:
-      PYTHONUNBUFFERED: "1"
-      BASE_URL: "https://dummyjson.com"
-      AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
-      AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: pyproject.toml
-
-      - name: Install dependencies (pyproject.toml)
-        run: |
-          python -m pip install --upgrade pip
-          pip install .
-
-      - name: Run Regression tests
-        run: |
-          mkdir -p artifacts
-          set -o pipefail
-          pytest -m regression \
-            --capture=tee-sys \
-            --junitxml=artifacts/junit-regression.xml \
-            --html=artifacts/report-regression.html --self-contained-html \
-            2>&1 | tee artifacts/console-regression.log
-
-      - name: Write CI summary (Regression)
-        if: always()
-        env:
-          SUITE_NAME: "Regression"
-          JUNIT_PATTERN: "artifacts/junit-regression.xml"
-        run: |
-          python tools/ci/junit_summary.py
-
-      # Always upload reports
-      - name: Upload report artifacts (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: regression-reports
-          path: |
-            artifacts/junit-regression.xml
-            artifacts/report-regression.html
-          if-no-files-found: warn
-
-      # Upload logs only if something failed
-      - name: Upload logs on failure (sanitized)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: regression-logs-failure
-          path: artifacts/console-regression.log
+          path: artifacts/console.log
           if-no-files-found: warn
