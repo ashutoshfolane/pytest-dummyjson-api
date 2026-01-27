@@ -1,4 +1,4 @@
-name: Nightly Regression
+name: Nightly
 
 on:
   schedule:
@@ -9,12 +9,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: nightly-regression
+  group: nightly
   cancel-in-progress: true
 
 jobs:
   regression:
-    name: Nightly Regression
+    name: Nightly Regression (includes auth)
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -46,34 +46,77 @@ jobs:
           set -o pipefail
           pytest -m regression \
             --capture=tee-sys \
-            --junitxml=artifacts/junit-nightly.xml \
-            --html=artifacts/report-nightly.html --self-contained-html \
-            2>&1 | tee artifacts/console-nightly.log
+            --junitxml=artifacts/junit-nightly-regression.xml \
+            --html=artifacts/report-nightly-regression.html --self-contained-html \
+            2>&1 | tee artifacts/console.log
 
-      - name: Write CI summary (Nightly)
-        if: always()
-        env:
-          SUITE_NAME: "Nightly Regression"
-          JUNIT_PATTERN: "artifacts/junit-nightly.xml"
-        run: |
-          python tools/ci/junit_summary.py
-
-      # Always upload reports
       - name: Upload report artifacts (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nightly-reports
+          name: nightly-regression-reports
           path: |
-            artifacts/junit-nightly.xml
-            artifacts/report-nightly.html
+            artifacts/junit-nightly-regression.xml
+            artifacts/report-nightly-regression.html
           if-no-files-found: warn
 
-      # Upload logs only if something failed
       - name: Upload logs on failure (sanitized)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: nightly-logs-failure
-          path: artifacts/console-nightly.log
+          name: nightly-regression-logs-failure
+          path: artifacts/console.log
+          if-no-files-found: warn
+
+  contract:
+    name: Nightly Contract (schema)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      BASE_URL: "https://dummyjson.com"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install dependencies (pyproject.toml)
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Run Contract tests
+        run: |
+          mkdir -p artifacts
+          set -o pipefail
+          pytest -m contract \
+            --capture=tee-sys \
+            --junitxml=artifacts/junit-nightly-contract.xml \
+            --html=artifacts/report-nightly-contract.html --self-contained-html \
+            2>&1 | tee artifacts/console.log
+
+      - name: Upload report artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-contract-reports
+          path: |
+            artifacts/junit-nightly-contract.xml
+            artifacts/report-nightly-contract.html
+          if-no-files-found: warn
+
+      - name: Upload logs on failure (sanitized)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-contract-logs-failure
+          path: artifacts/console.log
           if-no-files-found: warn
