@@ -1,6 +1,7 @@
+# config correctness
 from __future__ import annotations
 
-from .config import Settings
+from api_framework.config import Settings
 
 
 def validate_settings(s: Settings) -> None:
