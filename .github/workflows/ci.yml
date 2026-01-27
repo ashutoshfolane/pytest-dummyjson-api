@@ -50,6 +50,11 @@ jobs:
             --html=artifacts/report-smoke.html --self-contained-html \
             2>&1 | tee artifacts/console.log
 
+      - name: Flake report (report-only)
+        if: always()
+        run: |
+          python -m api_framework.reporting.flakes --junit artifacts/junit-smoke.xml
+
       # Always upload reports
       - name: Upload report artifacts (always)
         if: always()
@@ -59,6 +64,7 @@ jobs:
           path: |
             artifacts/junit-smoke.xml
             artifacts/report-smoke.html
+            artifacts/flake-report.md
           if-no-files-found: warn
 
       # Upload logs only if something failed

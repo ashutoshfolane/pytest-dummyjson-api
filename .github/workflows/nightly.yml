@@ -50,6 +50,11 @@ jobs:
             --html=artifacts/report-nightly-regression.html --self-contained-html \
             2>&1 | tee artifacts/console.log
 
+      - name: Flake report (report-only)
+        if: always()
+        run: |
+          python -m api_framework.reporting.flakes --junit artifacts/junit-nightly.xml
+
       - name: Upload report artifacts (always)
         if: always()
         uses: actions/upload-artifact@v4

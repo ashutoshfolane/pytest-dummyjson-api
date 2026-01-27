@@ -1,0 +1,22 @@
+{
+  "tests.auth.test_auth_smoke::test_login_gets_token_if_creds_present": [
+    {
+      "outcome": "skipped",
+      "run_id": "1769491188"
+    },
+    {
+      "outcome": "skipped",
+      "run_id": "1769491722"
+    }
+  ],
+  "tests.users.test_users_smoke::test_list_users": [
+    {
+      "outcome": "passed",
+      "run_id": "1769491188"
+    },
+    {
+      "outcome": "passed",
+      "run_id": "1769491722"
+    }
+  ]
+}
