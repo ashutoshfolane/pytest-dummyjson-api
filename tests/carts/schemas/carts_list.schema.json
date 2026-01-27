@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Carts list response",
+  "type": "object",
+  "required": ["carts", "total", "skip", "limit"],
+  "properties": {
+    "carts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "products", "total", "discountedTotal", "userId", "totalProducts", "totalQuantity"],
+        "properties": {
+          "id": { "type": "integer" },
+          "userId": { "type": "integer" },
+          "total": { "type": "number" },
+          "discountedTotal": { "type": "number" },
+          "totalProducts": { "type": "integer" },
+          "totalQuantity": { "type": "integer" },
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "price", "quantity", "total", "discountPercentage", "discountedTotal"],
+              "properties": {
+                "id": { "type": "integer" },
+                "title": { "type": "string" },
+                "price": { "type": "number" },
+                "quantity": { "type": "integer" },
+                "total": { "type": "number" },
+                "discountPercentage": { "type": "number" },
+                "discountedTotal": { "type": "number" }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "total": { "type": "integer" },
+    "skip": { "type": "integer" },
+    "limit": { "type": "integer" }
+  },
+  "additionalProperties": true
+}
