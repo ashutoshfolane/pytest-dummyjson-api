@@ -2,11 +2,6 @@ import pytest
 
 from api_framework.clients.posts_client import PostsClient
 
-# -----------------------
-# Smoke (critical path)
-# Includes CRUD operations
-# -----------------------
-
 
 @pytest.mark.smoke
 def test_list_posts_smoke(api):
