@@ -217,6 +217,28 @@ pre-commit install
 pre-commit run --all-files
 ```
 ---
+## Quality Dashboard
+
+This framework includes a **lightweight, zero-backend quality dashboard** to provide clear visibility into API test health.
+
+### What the dashboard shows
+- Test suite summary (smoke / regression / contract)
+- Total tests, pass rate, failures, skips
+- Execution duration
+- Flaky candidates (based on rolling history)
+- Top failing tests
+
+### How it works
+1. Pytest generates **JUnit XML** during test execution.
+2. Reporting scripts aggregate results into a single **metrics.json** file.
+3. A static **HTML dashboard** renders the metrics in the browser.
+4. All reports and dashboards are published as **CI artifacts**.
+
+### How to view the dashboard
+- Download `dashboard.html` and `metrics.json` from CI artifacts.
+- Open `dashboard.html` locally in a browser.
+- Load `metrics.json` when prompted.
+---
 ## Design principles (6C model)
 This framework is built using the **6C approach**:
 1. **Core** – clean runnable skeleton  

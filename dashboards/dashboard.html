@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>API Test Dashboard</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #111a33;
+        --panel2: #0f1730;
+        --text: #e7ecff;
+        --muted: #a7b1d6;
+        --border: rgba(255, 255, 255, 0.08);
+        --good: #3ddc97;
+        --bad: #ff5c7a;
+        --warn: #ffd66b;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        background: radial-gradient(1200px 600px at 20% -10%, rgba(61, 220, 151, 0.18), transparent 60%),
+          radial-gradient(1000px 600px at 100% 0%, rgba(255, 92, 122, 0.16), transparent 60%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 16px 48px;
+      }
+
+      header {
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0.2px;
+      }
+
+      .sub {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.09);
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 12px;
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .kpi {
+        grid-column: span 3;
+        min-height: 88px;
+      }
+      .kpi .label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      .kpi .value {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .kpi .hint {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .wide {
+        grid-column: span 12;
+      }
+
+      .half {
+        grid-column: span 6;
+      }
+
+      .mono {
+        font-family: var(--mono);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 10px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 12px;
+      }
+      tr:hover td {
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+      }
+      .ok {
+        color: var(--good);
+      }
+      .bad {
+        color: var(--bad);
+      }
+      .warn {
+        color: var(--warn);
+      }
+
+      .empty {
+        color: var(--muted);
+        font-size: 13px;
+        padding: 10px 0 2px;
+      }
+
+      .footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .drop {
+        border: 1px dashed rgba(255, 255, 255, 0.22);
+        border-radius: 16px;
+        padding: 10px 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .drop strong {
+        color: var(--text);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>API Test Dashboard</h1>
+          <div class="sub" id="subtitle">Load a <span class="mono">metrics.json</span> to render suite results.</div>
+        </div>
+
+        <div class="controls">
+          <label class="btn" for="file">Load metrics.json</label>
+          <input id="file" type="file" accept="application/json" />
+          <div class="drop" id="drop">Tip: drag & drop <strong>metrics.json</strong> here</div>
+        </div>
+      </header>
+
+      <div class="grid">
+        <div class="card kpi">
+          <div class="label">Suite</div>
+          <div class="value mono" id="kpi-suite">—</div>
+          <div class="hint mono" id="kpi-run">Run: —</div>
+        </div>
+
+        <div class="card kpi">
+          <div class="label">Pass rate</div>
+          <div class="value" id="kpi-passrate">—</div>
+          <div class="hint" id="kpi-counts">—</div>
+        </div>
+
+        <div class="card kpi">
+          <div class="label">Duration</div>
+          <div class="value" id="kpi-duration">—</div>
+          <div class="hint mono" id="kpi-generated">—</div>
+        </div>
+
+        <div class="card kpi">
+          <div class="label">Flaky candidates</div>
+          <div class="value" id="kpi-flakes">—</div>
+          <div class="hint">Report-only (history window)</div>
+        </div>
+
+        <div class="card half">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+            <div>
+              <div class="mono" style="font-size:14px; font-weight:700">Top failures</div>
+              <div class="sub">Most recent failing tests from this run</div>
+            </div>
+            <span class="pill bad" id="badge-failures">—</span>
+          </div>
+          <div id="failures"></div>
+        </div>
+
+        <div class="card half">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+            <div>
+              <div class="mono" style="font-size:14px; font-weight:700">Slowest tests</div>
+              <div class="sub">Top duration tests (useful for optimization)</div>
+            </div>
+            <span class="pill warn" id="badge-slowest">—</span>
+          </div>
+          <div id="slowest"></div>
+        </div>
+
+        <div class="card wide">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+            <div>
+              <div class="mono" style="font-size:14px; font-weight:700">Flaky candidates (history window)</div>
+              <div class="sub">A candidate = saw at least one pass and one fail across saved history</div>
+            </div>
+            <span class="pill warn" id="badge-flaky">—</span>
+          </div>
+          <div id="flaky"></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Open this dashboard from CI artifacts, then load the <span class="mono">metrics.json</span> file generated by the job.
+      </div>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      function fmtSeconds(s) {
+        const n = Number(s || 0);
+        if (!Number.isFinite(n)) return "—";
+        if (n < 60) return `${n.toFixed(1)}s`;
+        const m = Math.floor(n / 60);
+        const rem = n - m * 60;
+        return `${m}m ${rem.toFixed(0)}s`;
+      }
+
+      function badge(el, text, cls) {
+        el.textContent = text;
+        el.className = `pill ${cls || ""}`;
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function renderTable(container, columns, rows) {
+        if (!rows || rows.length === 0) {
+          container.innerHTML = `<div class="empty">✅ Nothing to show.</div>`;
+          return;
+        }
+
+        const thead = `<thead><tr>${columns.map((c) => `<th>${escapeHtml(c.label)}</th>`).join("")}</tr></thead>`;
+        const tbody = `<tbody>
+          ${rows
+            .map((r) => {
+              return `<tr>
+                ${columns
+                  .map((c) => {
+                    const v = r[c.key];
+                    return `<td>${c.render ? c.render(v, r) : escapeHtml(v)}</td>`;
+                  })
+                  .join("")}
+              </tr>`;
+            })
+            .join("")}
+        </tbody>`;
+
+        container.innerHTML = `<table>${thead}${tbody}</table>`;
+      }
+
+      function render(metrics) {
+        const suite = metrics.suite || "—";
+        const runId = metrics.run_id || "—";
+        const generated = metrics.generated_at_utc || "—";
+        const summary = metrics.summary || {};
+
+        const total = summary.total ?? 0;
+        const passed = summary.passed ?? 0;
+        const failed = summary.failed ?? 0;
+        const skipped = summary.skipped ?? 0;
+        const passRate = summary.pass_rate_percent ?? 0;
+        const duration = summary.duration_s ?? 0;
+
+        $("subtitle").textContent = `Loaded: suite=${suite}, run=${runId}`;
+        $("kpi-suite").textContent = suite;
+        $("kpi-run").textContent = `Run: ${runId}`;
+        $("kpi-generated").textContent = `Generated: ${generated}`;
+        $("kpi-passrate").textContent = `${passRate}%`;
+        $("kpi-counts").textContent = `T:${total}  P:${passed}  F:${failed}  S:${skipped}`;
+        $("kpi-duration").textContent = fmtSeconds(duration);
+
+        const flakes = metrics.flakes || {};
+        const flakeCount = flakes.flaky_candidates_count ?? 0;
+        $("kpi-flakes").textContent = String(flakeCount);
+
+        badge($("badge-failures"), `${failed} failed`, failed > 0 ? "bad" : "ok");
+        badge($("badge-slowest"), `top ${Math.min(15, (metrics.slowest_tests || []).length)}`, "warn");
+        badge($("badge-flaky"), `${flakeCount} candidates`, flakeCount > 0 ? "warn" : "ok");
+
+        // Failures
+        renderTable(
+          $("failures"),
+          [
+            { key: "test_id", label: "Test", render: (v) => `<span class="mono">${escapeHtml(v)}</span>` },
+            { key: "duration_s", label: "Dur (s)", render: (v) => `<span class="mono">${escapeHtml(v)}</span>` },
+            { key: "message", label: "Message", render: (v) => `<span class="mono">${escapeHtml(v)}</span>` }
+          ],
+          metrics.top_failures || []
+        );
+
+        // Slowest
+        renderTable(
+          $("slowest"),
+          [
+            { key: "test_id", label: "Test", render: (v) => `<span class="mono">${escapeHtml(v)}</span>` },
+            {
+              key: "outcome",
+              label: "Outcome",
+              render: (v) => {
+                const cls = v === "passed" ? "ok" : v === "failed" ? "bad" : "warn";
+                return `<span class="${cls}">${escapeHtml(v)}</span>`;
+              }
+            },
+            { key: "duration_s", label: "Dur (s)", render: (v) => `<span class="mono">${escapeHtml(v)}</span>` }
+          ],
+          metrics.slowest_tests || []
+        );
+
+        // Flaky candidates
+        renderTable(
+          $("flaky"),
+          [
+            { key: "test_id", label: "Test", render: (v) => `<span class="mono">${escapeHtml(v)}</span>` },
+            { key: "passed", label: "Passed", render: (v) => `<span class="ok mono">${escapeHtml(v)}</span>` },
+            { key: "failed", label: "Failed", render: (v) => `<span class="bad mono">${escapeHtml(v)}</span>` },
+            { key: "skipped", label: "Skipped", render: (v) => `<span class="warn mono">${escapeHtml(v)}</span>` }
+          ],
+          (flakes.flaky_candidates || []).map((c) => ({
+            test_id: c.test_id,
+            passed: c.passed,
+            failed: c.failed,
+            skipped: c.skipped
+          }))
+        );
+      }
+
+      async function loadFile(file) {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        render(data);
+      }
+
+      // File input
+      $("file").addEventListener("change", async (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        await loadFile(f);
+      });
+
+      // Drag & drop
+      const drop = $("drop");
+      drop.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        drop.style.background = "rgba(255,255,255,0.06)";
+      });
+      drop.addEventListener("dragleave", () => {
+        drop.style.background = "";
+      });
+      drop.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        drop.style.background = "";
+        const f = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (!f) return;
+        await loadFile(f);
+      });
+    </script>
+  </body>
+</html>
