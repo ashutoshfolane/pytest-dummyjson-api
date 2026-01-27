@@ -47,15 +47,15 @@ def test_carts_by_user(api):
 # -----------------------
 
 
-@pytest.mark.negative
 @pytest.mark.regression
+@pytest.mark.negative
 def test_get_cart_invalid_id_returns_404_or_error(api):
     r = CartsClient(api).get_cart_raw(0)
     assert r.status_code in (404, 400)
 
 
-@pytest.mark.negative
 @pytest.mark.regression
+@pytest.mark.negative
 def test_carts_by_user_invalid_returns_404_or_empty(api):
     r = CartsClient(api).carts_by_user_raw(0)
 
