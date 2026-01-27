@@ -48,7 +48,15 @@ jobs:
             --capture=tee-sys \
             --junitxml=artifacts/junit-nightly.xml \
             --html=artifacts/report-nightly.html --self-contained-html \
-            2>&1 | tee artifacts/console.log
+            2>&1 | tee artifacts/console-nightly.log
+
+      - name: Write CI summary (Nightly)
+        if: always()
+        env:
+          SUITE_NAME: "Nightly Regression"
+          JUNIT_PATTERN: "artifacts/junit-nightly.xml"
+        run: |
+          python tools/ci/junit_summary.py
 
       # Always upload reports
       - name: Upload report artifacts (always)
@@ -67,5 +75,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nightly-logs-failure
-          path: artifacts/console.log
+          path: artifacts/console-nightly.log
           if-no-files-found: warn

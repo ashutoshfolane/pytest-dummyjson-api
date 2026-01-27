@@ -50,7 +50,15 @@ jobs:
             --capture=tee-sys \
             --junitxml=artifacts/junit-smoke.xml \
             --html=artifacts/report-smoke.html --self-contained-html \
-            2>&1 | tee artifacts/console.log
+            2>&1 | tee artifacts/console-smoke.log
+
+      - name: Write CI summary (Smoke)
+        if: always()
+        env:
+          SUITE_NAME: "Smoke"
+          JUNIT_PATTERN: "artifacts/junit-smoke.xml"
+        run: |
+          python tools/ci/junit_summary.py
 
       # Always upload reports
       - name: Upload report artifacts (always)
@@ -69,7 +77,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: smoke-logs-failure
-          path: artifacts/console.log
+          path: artifacts/console-smoke.log
           if-no-files-found: warn
 
   regression:
@@ -109,7 +117,15 @@ jobs:
             --capture=tee-sys \
             --junitxml=artifacts/junit-regression.xml \
             --html=artifacts/report-regression.html --self-contained-html \
-            2>&1 | tee artifacts/console.log
+            2>&1 | tee artifacts/console-regression.log
+
+      - name: Write CI summary (Regression)
+        if: always()
+        env:
+          SUITE_NAME: "Regression"
+          JUNIT_PATTERN: "artifacts/junit-regression.xml"
+        run: |
+          python tools/ci/junit_summary.py
 
       # Always upload reports
       - name: Upload report artifacts (always)
@@ -128,5 +144,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: regression-logs-failure
-          path: artifacts/console.log
+          path: artifacts/console-regression.log
           if-no-files-found: warn
