@@ -41,7 +41,7 @@ def test_list_posts_pagination(api):
 @pytest.mark.negative
 def test_get_post_invalid_id_returns_404(api):
     # 0 is typically invalid in DummyJSON
-    r = api.get("/posts/0")
+    r = PostsClient(api).get_post_raw(0)
     assert r.status_code == 404
 
 
@@ -49,7 +49,7 @@ def test_get_post_invalid_id_returns_404(api):
 @pytest.mark.negative
 def test_search_posts_empty_query_returns_200(api):
     # Not always an error; validate behavior + response shape.
-    r = api.get("/posts/search", params={"q": ""})
+    r = PostsClient(api).search_posts_raw(q="")
     assert r.status_code == 200
     body = r.json()
     assert "posts" in body

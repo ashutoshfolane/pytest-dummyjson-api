@@ -54,15 +54,14 @@ def test_user_child_resources(api):
 @pytest.mark.regression
 @pytest.mark.negative
 def test_get_user_invalid_id_returns_404(api):
-    # 0 is consistently invalid on DummyJSON
-    r = api.get("/users/0")
+    r = UsersClient(api).get_user_raw(0)
     assert r.status_code == 404
 
 
 @pytest.mark.regression
 @pytest.mark.negative
 def test_search_users_empty_query_returns_200(api):
-    r = api.get("/users/search", params={"q": ""})
+    r = UsersClient(api).search_users_raw(q="")
     assert r.status_code == 200
     body = r.json()
     assert "users" in body
@@ -72,7 +71,10 @@ def test_search_users_empty_query_returns_200(api):
 @pytest.mark.regression
 @pytest.mark.negative
 def test_filter_users_invalid_key_returns_error_or_empty(api):
-    r = api.get("/users/filter", params={"key": "this.key.does.not.exist", "value": "x"})
+    r = UsersClient(api).filter_users_raw(
+        key="this.key.does.not.exist",
+        value="x",
+    )
 
     # Some public APIs return 400/404, others return empty set (200).
     if r.status_code in (400, 404):

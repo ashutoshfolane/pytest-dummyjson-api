@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import httpx
+
 from api_framework.client import ApiClient
 
 
@@ -72,3 +74,15 @@ class ProductsClient:
         r = self.api.get(f"/products/category/{category_slug}")
         r.raise_for_status()
         return r.json()
+
+    # -----------------------
+    # RAW helpers
+    # -----------------------
+    def get_product_raw(self, product_id: int) -> httpx.Response:
+        return self.api.get(f"/products/{product_id}")
+
+    def products_by_category_raw(self, category_slug: str) -> httpx.Response:
+        return self.api.get(f"/products/category/{category_slug}")
+
+    def search_products_raw(self, *, q: str) -> httpx.Response:
+        return self.api.get("/products/search", params={"q": q})

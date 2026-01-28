@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import httpx
+
 from api_framework.client import ApiClient
 
 
@@ -59,3 +61,15 @@ class RecipesClient:
         r = self.api.request("DELETE", f"/recipes/{recipe_id}")
         r.raise_for_status()
         return r.json()
+
+    # -----------------------
+    # RAW helpers
+    # -----------------------
+    def get_recipe_raw(self, recipe_id: int) -> httpx.Response:
+        return self.api.get(f"/recipes/{recipe_id}")
+
+    def recipes_by_tag_raw(self, tag: str) -> httpx.Response:
+        return self.api.get(f"/recipes/tag/{tag}")
+
+    def search_recipes_raw(self, *, q: str) -> httpx.Response:
+        return self.api.get("/recipes/search", params={"q": q})
