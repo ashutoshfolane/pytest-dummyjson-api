@@ -61,14 +61,14 @@ def test_recipes_by_meal_type(api):
 @pytest.mark.regression
 @pytest.mark.negative
 def test_get_recipe_invalid_id_returns_404(api):
-    r = api.get("/recipes/0")
+    r = RecipesClient(api).get_recipe_raw(0)
     assert r.status_code == 404
 
 
 @pytest.mark.regression
 @pytest.mark.negative
 def test_recipes_by_tag_invalid_returns_error_or_empty(api):
-    r = api.get("/recipes/tag/this-tag-does-not-exist")
+    r = RecipesClient(api).recipes_by_tag_raw("this-tag-does-not-exist")
 
     if r.status_code in (404, 400):
         return
@@ -83,7 +83,7 @@ def test_recipes_by_tag_invalid_returns_error_or_empty(api):
 @pytest.mark.regression
 @pytest.mark.negative
 def test_search_recipes_empty_query_returns_200(api):
-    r = api.get("/recipes/search", params={"q": ""})
+    r = RecipesClient(api).search_recipes_raw(q="")
     assert r.status_code == 200
     body = r.json()
     assert "recipes" in body

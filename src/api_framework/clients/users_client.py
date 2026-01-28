@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import httpx
+
 from api_framework.client import ApiClient
 
 
@@ -65,3 +67,15 @@ class UsersClient:
         r = self.api.request("DELETE", f"/users/{user_id}")
         r.raise_for_status()
         return r.json()
+
+    # -----------------------
+    # RAW helpers
+    # -----------------------
+    def get_user_raw(self, user_id: int) -> httpx.Response:
+        return self.api.get(f"/users/{user_id}")
+
+    def search_users_raw(self, *, q: str) -> httpx.Response:
+        return self.api.get("/users/search", params={"q": q})
+
+    def filter_users_raw(self, *, key: str, value: str) -> httpx.Response:
+        return self.api.get("/users/filter", params={"key": key, "value": value})

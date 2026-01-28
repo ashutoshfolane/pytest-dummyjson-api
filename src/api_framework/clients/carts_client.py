@@ -46,7 +46,7 @@ class CartsClient:
         return r.json()
 
     # -----------------------
-    # Raw helpers (status code tests)
+    # Raw helpers
     # -----------------------
 
     def list_carts_raw(self, *, limit: int = 30, skip: int = 0) -> httpx.Response:

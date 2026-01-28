@@ -50,14 +50,14 @@ def test_list_products_pagination(api):
 @pytest.mark.regression
 @pytest.mark.negative
 def test_get_product_invalid_id_returns_404(api):
-    r = api.get("/products/0")
+    r = ProductsClient(api).get_product_raw(0)
     assert r.status_code == 404
 
 
 @pytest.mark.regression
 @pytest.mark.negative
 def test_products_by_category_invalid_returns_error_or_empty(api):
-    r = api.get("/products/category/this-category-does-not-exist")
+    r = ProductsClient(api).products_by_category_raw("this-category-does-not-exist")
 
     if r.status_code in (404, 400):
         return
@@ -72,8 +72,7 @@ def test_products_by_category_invalid_returns_error_or_empty(api):
 @pytest.mark.regression
 @pytest.mark.negative
 def test_search_products_empty_query_returns_200(api):
-    # Not always an error in public APIs; validate behavior and shape.
-    r = api.get("/products/search", params={"q": ""})
+    r = ProductsClient(api).search_products_raw(q="")
     assert r.status_code == 200
     body = r.json()
     assert "products" in body

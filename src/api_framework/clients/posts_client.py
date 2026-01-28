@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import httpx
+
 from api_framework.client import ApiClient
 
 
@@ -38,3 +40,12 @@ class PostsClient:
         r = self.api.request("DELETE", f"/posts/{post_id}")
         r.raise_for_status()
         return r.json()
+
+    # -----------------------
+    # RAW helpers
+    # -----------------------
+    def get_post_raw(self, post_id: int) -> httpx.Response:
+        return self.api.get(f"/posts/{post_id}")
+
+    def search_posts_raw(self, *, q: str) -> httpx.Response:
+        return self.api.get("/posts/search", params={"q": q})
